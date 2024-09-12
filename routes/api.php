@@ -19,24 +19,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware('throttle:global')->group(function () {
     Route::get('/', function () {
         return 'Library APIS';
     });
 
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+    Route::post('/login', [AuthController::class, 'login']);
     Route::get('/books', [BookController::class, 'index']);
     Route::get('/books/{id}', [BookController::class, 'show']);
     Route::get('/authors', [AuthorController::class, 'index']);
     Route::get('/authors/{id}', [AuthorController::class, 'show']);
+    Route::post('/users', [UserController::class, 'store']);
 
-    Route::middleware(['auth:sanctum'])->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
 
-        Route::get('/users', [UserController::class, 'index'])->middleware('role:Admin');
-        Route::get('/users/{id}', [UserController::class, 'show'])->middleware('role:Admin');
+        
+        Route::get('/users', [UserController::class, 'index']);
+        Route::get('/users/{id}', [UserController::class, 'show']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
@@ -59,4 +61,8 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/logout', [AuthController::class, 'logout']);
     });
+
+    // Route::middleware('auth.jwt')->group( function () {
+    //     Route::get('/users', [UserController::class, 'index']);
+    // });
 });
