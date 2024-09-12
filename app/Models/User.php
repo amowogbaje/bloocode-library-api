@@ -48,4 +48,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(BorrowRecord::class);
     }
+    
+    public function isAdmin()
+    {
+        return $this->role === 'Admin';
+    }
+
+    public function isLibrarian()
+    {
+        return $this->role === 'Librarian';
+    }
+
+    public function isMember()
+    {
+        return $this->role === 'Member';
+    }
 }
