@@ -19,8 +19,8 @@ This project is a Laravel 10-based library management system. It includes featur
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/amowogbaje/bloocode-library-api.git
-cd bloocode-library-api
+git clone https://github.com/amowogbaje/library-management-system-api.git
+cd library-management-system-api
 ```
 
 ### 2. Install Dependencies
