@@ -21,7 +21,7 @@ class UserPolicy
 
     public function create(User $user)
     {
-        return true; // Anyone can register
+        return true; 
     }
 
     public function update(User $user, User $model)

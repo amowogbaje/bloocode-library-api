@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Author;
 use Illuminate\Http\Request;
 use App\Http\Resources\AuthorResource;
+use App\Http\Requests\AuthorRequest;
+use App\Services\AuthorService;
 
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -17,6 +19,14 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class AuthorController extends Controller
 {
+    protected $authorService;
+
+    public function __construct(AuthorService $authorService)
+    {
+        $this->authorService = $authorService;
+    }
+
+
     /**
      * @OA\Get(
      *     path="/api/v1/authors",
@@ -65,9 +75,7 @@ class AuthorController extends Controller
     public function index()
     {
         try {
-
-            $authors = Author::all();
-
+            $authors = $this->authorService->getAllAuthors();
             return $this->success('Authors retrieved successfully', AuthorResource::collection($authors));
         } catch (AuthorizationException $e) {
             return $this->error('Unauthorized', $e->getMessage(), Response::HTTP_FORBIDDEN);
@@ -138,8 +146,7 @@ class AuthorController extends Controller
     public function show($id)
     {
         try {
-            $author = Author::findOrFail($id);
-
+            $author = $this->authorService->getAuthorById($id);
             return $this->success('Author retrieved successfully', new AuthorResource($author));
         } catch (ModelNotFoundException $e) {
             return $this->error('Author not found', $e->getMessage(), Response::HTTP_NOT_FOUND);
@@ -215,19 +222,12 @@ class AuthorController extends Controller
      *     )
      * )
      */
-    public function store(Request $request)
+    public function store(AuthorRequest $request)
     {
         try {
             $this->authorize('create', Author::class);
-
-            $validatedData = $request->validate([
-                'name' => 'required|string',
-                'bio' => 'nullable|string',
-                'birthdate' => 'nullable|date',
-            ]);
-
-            $author = Author::create($validatedData);
-
+            $validatedData = $request->validated();
+            $author = $this->authorService->createAuthor($validatedData);
             return $this->success('Author created successfully', new AuthorResource($author), Response::HTTP_CREATED);
         } catch (ValidationException $e) {
             return $this->error('Validation Error', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -323,34 +323,28 @@ class AuthorController extends Controller
      * )
      */
 
-    public function update(Request $request, $id)
-    {
-        try {
-            $author = Author::findOrFail($id);
-            $this->authorize('update', $author);
-
-            $validatedData = $request->validate([
-                'name' => 'required|string',
-                'bio' => 'nullable|string',
-                'birthdate' => 'nullable|date',
-            ]);
-
-            $author->update($validatedData);
-
-            return $this->success('Author updated successfully', new AuthorResource($author));
-        } catch (ValidationException $e) {
-            return $this->error('Validation Error', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
-        } catch (AuthorizationException $e) {
-            return $this->error('Unauthorized', $e->getMessage(), Response::HTTP_FORBIDDEN);
-        } catch (ModelNotFoundException $e) {
-            return $this->error('Author not found', $e->getMessage(), Response::HTTP_NOT_FOUND);
-        } catch (QueryException $e) {
-            return $this->error('Database Error', $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        } catch (\Throwable $e) {
-            Log::error('Error updating author: ' . $e->getMessage());
-            return $this->error('An error occurred while updating the author. Please try again later.', $e->getMessage());
-        }
-    }
+    
+    public function update(AuthorRequest $request, $id)
+     {
+         try {
+             $author = $this->authorService->getAuthorById($id);
+             $this->authorize('update', $author);
+             $validatedData = $request->validated();
+             $author = $this->authorService->updateAuthor($author, $validatedData);
+             return $this->success('Author updated successfully', new AuthorResource($author));
+         } catch (ValidationException $e) {
+             return $this->error('Validation Error', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+         } catch (AuthorizationException $e) {
+             return $this->error('Unauthorized', $e->getMessage(), Response::HTTP_FORBIDDEN);
+         } catch (ModelNotFoundException $e) {
+             return $this->error('Author not found', $e->getMessage(), Response::HTTP_NOT_FOUND);
+         } catch (QueryException $e) {
+             return $this->error('Database Error', $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+         } catch (\Throwable $e) {
+             Log::error('Error updating author: ' . $e->getMessage());
+             return $this->error('An error occurred while updating the author. Please try again later.', $e->getMessage());
+         }
+     }
 
     /**
      * @OA\Delete(
@@ -406,11 +400,9 @@ class AuthorController extends Controller
     public function destroy($id)
     {
         try {
-            $author = Author::findOrFail($id);
+            $author = $this->authorService->getAuthorById($id);
             $this->authorize('delete', $author);
-
-            $author->delete();
-
+            $this->authorService->deleteAuthor($author);
             return $this->success('Author deleted successfully', null);
         } catch (ModelNotFoundException $e) {
             return $this->error('Author not found', $e->getMessage(), Response::HTTP_NOT_FOUND);

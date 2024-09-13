@@ -37,6 +37,8 @@ class UserService
         return $user;
     }
 
+    
+
     public function deleteUser($id)
     {
         $user = User::findOrFail($id);
