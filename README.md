@@ -29,7 +29,6 @@ Run the following commands to install PHP and JavaScript dependencies:
 
 ```bash
 composer install
-npm install
 ```
 
 ### 3. Environment Configuration
