@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::prefix('v1')->middleware('throttle:global')->group(function () {
     Route::get('/', function () {
         return 'Library APIS';
@@ -55,7 +56,6 @@ Route::prefix('v1')->middleware('throttle:global')->group(function () {
         Route::delete('/authors/{id}', [AuthorController::class, 'destroy']);
 
         Route::get('/borrow-records', [BorrowRecordController::class, 'index']);
-        Route::post('/borrow-records', [BorrowRecordController::class, 'store']);
         Route::get('/borrow-records/{id}', [BorrowRecordController::class, 'show']);
 
 

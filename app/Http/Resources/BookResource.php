@@ -14,9 +14,9 @@ class BookResource extends JsonResource
             'isbn' => $this->isbn,
             'published_date' => $this->published_date,
             'author_id' => $this->author_id,
+            'author' => new AuthorResource($this->whenLoaded('author')),
+
             'status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }

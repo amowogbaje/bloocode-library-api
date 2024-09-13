@@ -20,6 +20,7 @@ return new class extends Migration
             $table->dateTime('returned_at')->nullable();
             $table->timestamps();
         });
+
     }
 
     /**

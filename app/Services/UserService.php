@@ -11,7 +11,7 @@ class UserService
 {
     public function getAllUsers()
     {
-        return User::select('name', 'email', 'role')->orderBy('created_at', 'desc')->get();
+        return User::select('id', 'name', 'email', 'role')->orderBy('created_at', 'desc')->get();
     }
 
     public function getUserById($id)

@@ -37,11 +37,11 @@ class BookPolicy
 
     public function borrow(User $user, Book $book)
     {
-        return $user->isMember() && $book->status === 'Available';
+        return ($user->isAdmin() || $user->isMember()) && $book->status === 'Available';
     }
 
     public function return(User $user, Book $book)
     {
-        return $user->isMember() && $book->status === 'Borrowed';
+        return ($user->isAdmin() || $user->isMember()) && $book->status === 'Borrowed';
     }
 }

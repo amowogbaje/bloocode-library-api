@@ -19,13 +19,11 @@ class UserFeatureTest extends TestCase
     {
         parent::setUp();
 
-        // Create an admin user
         $this->adminUser = User::factory()->create([
             'role' => 'Admin',
             'password' => Hash::make('password')
         ]);
 
-        // Create a normal user
         $this->normalUser = User::factory()->create([
             'role' => 'Member',
             'password' => Hash::make('password')

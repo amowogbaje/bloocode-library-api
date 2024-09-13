@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Author;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Log;
 
 class AuthorPolicy
 {
@@ -12,6 +13,11 @@ class AuthorPolicy
 
     public function viewAny(User $user)
     {
+        Log::info('User accessing viewAny policy method', [
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'user_role' => $user->role,
+        ]);
         return $user->isAdmin() || $user->isLibrarian() || $user->isMember();
     }
 

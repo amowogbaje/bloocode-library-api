@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Access\AuthorizationException;
+use OpenApi\Annotations as OA;
 
 class UserController extends Controller
 {
@@ -23,47 +24,54 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
+
     /**
-     * @SWG\Get(
+     * @OA\Get(
      *     path="/api/v1/users",
      *     summary="Get all users",
      *     tags={"Users"},
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="Users retrieved successfully",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="Users retrieved successfully"),
-     *             @SWG\Property(property="data", type="array", @SWG\Items(ref="#/components/schemas/User"))
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Users retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="name", type="string", example="Gideon"),
+     *                     @OA\Property(property="email", type="string", example="amowogabssje@gmail.com"),
+     *                     @OA\Property(property="role", type="string", example="Admin")
+     *                 )
+     *             )
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=403,
      *         description="Unauthorized",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="Unauthorized"),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=500,
      *         description="Internal Server Error",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="An error occurred while retrieving users. Please try again later."),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An error occurred while retrieving users. Please try again later."),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     )
      * )
      */
-
     public function index(Request $request)
     {
         try {
-            $this->authorize('viewAny', User::class);
 
             $users = $this->userService->getAllUsers();
 
             return $this->success('Users retrieved successfully', UserResource::collection($users));
-
         } catch (AuthorizationException $e) {
             return $this->error('Unauthorized', $e->getMessage(), Response::HTTP_FORBIDDEN);
         } catch (\Throwable $e) {
@@ -73,48 +81,56 @@ class UserController extends Controller
         }
     }
 
+
     /**
-     * @SWG\Get(
+     * @OA\Get(
      *     path="/api/v1/users/{id}",
      *     summary="Get a single user",
      *     tags={"Users"},
-     *     @SWG\Parameter(
+     *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="User ID",
-     *         @SWG\Schema(type="integer")
+     *         @OA\Schema(type="integer")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="User retrieved successfully",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="User retrieved successfully"),
-     *             @SWG\Property(property="data", ref="#/components/schemas/User")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=15),
+     *                 @OA\Property(property="name", type="string", example="Gideon"),
+     *                 @OA\Property(property="email", type="string", example="amowogabje@gmail.com"),
+     *                 @OA\Property(property="role", type="string", example="Admin")
+     *             )
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=404,
      *         description="User not found",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="User not found"),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User not found"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=403,
      *         description="Unauthorized",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="Unauthorized"),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=500,
      *         description="Internal Server Error",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="An error occurred while retrieving the user. Please try again later."),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An error occurred while retrieving the user. Please try again later."),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     )
      * )
@@ -139,45 +155,53 @@ class UserController extends Controller
     }
 
     /**
-     * @SWG\Post(
+     * @OA\Post(
      *     path="/api/v1/users",
      *     summary="Create a new user",
      *     tags={"Users"},
-     *     @SWG\RequestBody(
+     *     @OA\RequestBody(
      *         required=true,
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="name", type="string"),
-     *             @SWG\Property(property="email", type="string"),
-     *             @SWG\Property(property="password", type="string"),
-     *             @SWG\Property(property="role", type="string", enum={"Admin", "Librarian", "Member"})
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string"),
+     *             @OA\Property(property="role", type="string", enum={"Admin", "Librarian", "Member"})
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=201,
      *         description="User registered successfully",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="User registered successfully"),
-     *             @SWG\Property(property="data", ref="#/components/schemas/User")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User registered successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=15),
+     *                 @OA\Property(property="name", type="string", example="Gideon"),
+     *                 @OA\Property(property="email", type="string", example="amowogabje@gmail.com"),
+     *                 @OA\Property(property="role", type="string", example="Admin")
+     *             )
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=422,
      *         description="Validation Error",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="Validation Error"),
-     *             @SWG\Property(property="errors", type="object")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation Error"),
+     *             @OA\Property(property="errors", type="object")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=500,
      *         description="Internal Server Error",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="An error occurred"),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An error occurred"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     )
      * )
      */
+
     public function store(StoreUserRequest $request)
     {
         try {
@@ -196,68 +220,76 @@ class UserController extends Controller
     }
 
     /**
-     * @SWG\Put(
+     * @OA\Put(
      *     path="/api/v1/users/{id}",
      *     summary="Update a user",
      *     tags={"Users"},
-     *     @SWG\Parameter(
+     *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="User ID",
-     *         @SWG\Schema(type="integer")
+     *         @OA\Schema(type="integer")
      *     ),
-     *     @SWG\RequestBody(
+     *     @OA\RequestBody(
      *         required=false,
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="name", type="string"),
-     *             @SWG\Property(property="email", type="string"),
-     *             @SWG\Property(property="password", type="string"),
-     *             @SWG\Property(property="role", type="string", enum={"Admin", "Librarian", "Member"})
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string"),
+     *             @OA\Property(property="role", type="string", enum={"Admin", "Librarian", "Member"})
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="User updated successfully",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="User updated successfully"),
-     *             @SWG\Property(property="data", ref="#/components/schemas/User")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User updated successfully"),
+     *            @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=15),
+     *                 @OA\Property(property="name", type="string", example="Gideon"),
+     *                 @OA\Property(property="email", type="string", example="amowogabje@gmail.com"),
+     *                 @OA\Property(property="role", type="string", example="Admin")
+     *             )
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=422,
      *         description="Validation Error",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="Validation Error"),
-     *             @SWG\Property(property="errors", type="object")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation Error"),
+     *             @OA\Property(property="errors", type="object")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=404,
      *         description="User not found",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="User not found"),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User not found"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=403,
      *         description="Unauthorized",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="Authorization Error"),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=500,
      *         description="Internal Server Error",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="An error occurred"),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An error occurred"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     )
      * )
      */
+
     public function update(UpdateUserRequest $request, $id)
     {
         try {
@@ -280,51 +312,53 @@ class UserController extends Controller
     }
 
 
+
     /**
-     * @SWG\Delete(
+     * @OA\Delete(
      *     path="/api/v1/users/{id}",
      *     summary="Delete a user",
      *     tags={"Users"},
-     *     @SWG\Parameter(
+     *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="User ID",
-     *         @SWG\Schema(type="integer")
+     *         @OA\Schema(type="integer")
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=200,
      *         description="User deleted successfully",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="User deleted successfully")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User deleted successfully")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=404,
      *         description="User not found",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="User not found"),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User not found"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=403,
      *         description="Unauthorized",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="Unauthorized"),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     ),
-     *     @SWG\Response(
+     *     @OA\Response(
      *         response=500,
      *         description="Internal Server Error",
-     *         @SWG\JsonContent(
-     *             @SWG\Property(property="message", type="string", example="An error occurred while deleting the user. Please try again later."),
-     *             @SWG\Property(property="error", type="string")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An error occurred while deleting the user. Please try again later."),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     )
      * )
      */
+
     public function destroy($id)
     {
         try {

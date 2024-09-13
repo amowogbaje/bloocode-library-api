@@ -12,6 +12,7 @@ class BorrowRecordResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
             'book_id' => $this->book_id,
+            'book' => new BookResource($this->whenLoaded('book')),
             'borrowed_at' => $this->borrowed_at,
             'due_at' => $this->due_at,
             'returned_at' => $this->returned_at,
