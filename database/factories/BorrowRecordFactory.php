@@ -15,8 +15,8 @@ class BorrowRecordFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => User::factory(), // Assuming the User factory exists
-            'book_id' => Book::factory(), // Assuming the Book factory exists
+            'user_id' => User::factory(), 
+            'book_id' => Book::factory(), 
             'borrowed_at' => Carbon::now()->subDays(1),
             'due_at' => Carbon::now()->addDays(14),
             'returned_at' => $this->faker->optional()->dateTime,

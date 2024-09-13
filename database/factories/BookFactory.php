@@ -17,7 +17,7 @@ class BookFactory extends Factory
             'title' => $this->faker->sentence,
             'isbn' => $this->faker->unique()->isbn13,
             'published_date' => $this->faker->date,
-            'author_id' => Author::factory(), // Assuming the Author factory exists
+            'author_id' => Author::factory(), 
             'status' => $this->faker->randomElement(['Available', 'Borrowed']),
         ];
     }
