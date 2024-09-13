@@ -157,8 +157,8 @@ class BookController extends Controller
             $books = $this->bookService->getBooks($validatedData);
             $data = [
                 'count' => $books->total(),
-                'next' => $books->nextPageUrl() . '&page_size=' . ($validatedData['page_size'] ?? 10),
-                'previous' => $books->previousPageUrl() . '&page_size=' . ($validatedData['page_size'] ?? 10),
+                'next' => $books->nextPageUrl()? $books->nextPageUrl(). '&page_size=' . ($validatedData['page_size'] ?? 10) : null,
+                'previous' => $books->previousPageUrl()? $books->previousPageUrl() . '&page_size=' . ($validatedData['page_size'] ?? 10) : null,
                 'books' => BookResource::collection($books->items()),
             ];
 
