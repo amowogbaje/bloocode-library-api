@@ -10,6 +10,9 @@ use App\Http\Resources\BookResource;
 use App\Http\Resources\BorrowRecordResource;
 use App\Models\Book;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreBookRequest;
+use App\Http\Requests\UpdateBookRequest;
+use App\Services\BookService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +21,14 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class BookController extends Controller
 {
+    protected $bookService;
+
+    public function __construct(BookService $bookService)
+    {
+        $this->bookService = $bookService;
+    }
+
+
     /**
      * @OA\Get(
      *     path="/api/v1/books",
@@ -143,39 +154,11 @@ class BookController extends Controller
                 'sort' => 'sometimes|in:asc,desc',
             ]);
 
-            $page = $validatedData['page'] ?? 1;
-            $pageSize = $validatedData['page_size'] ?? 10;
-            $sort = $validatedData['sort'] ?? 'desc';
-            $query = Book::orderBy('created_at', $sort)
-                ->select('id', 'title', 'isbn', 'published_date', 'author_id', 'status')
-                ->with(['author:name,bio,birthdate']);
-
-            if (isset($validatedData['search'])) {
-                $searchQuery = $validatedData['search'];
-                $query->where(function ($subQuery) use ($searchQuery) {
-                    $subQuery->where('title', 'like', "%{$searchQuery}%")
-                        ->orWhere('isbn', 'like', "%{$searchQuery}%")
-                        ->orWhereHas('author', function ($authorQuery) use ($searchQuery) {
-                            $authorQuery->where('name', 'like', "%{$searchQuery}%");
-                        });
-                });
-            }
-
-            $books = $query->paginate($pageSize, ['*'], 'page', $page);
-            $nextPageUrl = $books->nextPageUrl();
-            $previousPageUrl = $books->previousPageUrl();
-            if ($nextPageUrl) {
-                $nextPageUrl .= '&page_size=' . $pageSize;
-            }
-
-            if ($previousPageUrl) {
-                $previousPageUrl .= '&page_size=' . $pageSize;
-            }
-
+            $books = $this->bookService->getBooks($validatedData);
             $data = [
                 'count' => $books->total(),
-                'next' => $nextPageUrl,
-                'previous' => $previousPageUrl,
+                'next' => $books->nextPageUrl() . '&page_size=' . ($validatedData['page_size'] ?? 10),
+                'previous' => $books->previousPageUrl() . '&page_size=' . ($validatedData['page_size'] ?? 10),
                 'books' => BookResource::collection($books->items()),
             ];
 
@@ -239,7 +222,7 @@ class BookController extends Controller
     public function show($id)
     {
         try {
-            $book = Book::findOrFail($id);
+            $book = $this->bookService->getBookById($id);
             return $this->success('Book retrieved successfully', new BookResource($book));
         } catch (AuthorizationException $e) {
             return $this->error('Unauthorized', $e->getMessage(), Response::HTTP_FORBIDDEN);
@@ -311,20 +294,13 @@ class BookController extends Controller
      * )
      */
 
-    public function store(Request $request)
+    public function store(StoreBookRequest $request)
     {
         try {
             $this->authorize('create', Book::class);
 
-            $request->validate([
-                'title' => 'required|string',
-                'isbn' => 'required|string|unique:books',
-                'published_date' => 'nullable|date',
-                'author_id' => 'required|exists:authors,id',
-                'status' => 'required|in:Available,Borrowed',
-            ]);
-
-            $book = Book::create($request->all());
+            $validatedData = $request->validated();
+            $book = $this->bookService->createBook($validatedData);
             return $this->success('Book created successfully', new BookResource($book), Response::HTTP_CREATED);
         } catch (AuthorizationException $e) {
             return $this->error('Unauthorized', $e->getMessage(), Response::HTTP_FORBIDDEN);
@@ -472,7 +448,7 @@ class BookController extends Controller
      * )
      */
 
-    public function destroy($id)
+     public function destroy($id)
     {
         try {
             $book = Book::findOrFail($id);
@@ -668,40 +644,16 @@ class BookController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'due_at' => 'required|integer|between:0,30'
+                'due_at' => 'required|integer|min:1',
             ]);
 
-            $book = Book::findOrFail($id);
-            $this->authorize('borrow', $book);
-
-            if ($book->status === 'Available') {
-                $book->update(['status' => 'Borrowed']);
-
-                // Create a borrow record
-                $borrowRecord = BorrowRecord::create([
-                    'user_id' => auth()->id(), // Current authenticated user
-                    'book_id' => $book->id,
-                    'borrowed_at' => now(),
-                    'due_at' => now()->addDays($validatedData['due_at']), // Set due date based on validated data
-                ]);
-                $borrowRecord->load('book');
-
-                return $this->success('Book borrowed successfully', new BorrowRecordResource($borrowRecord));
-            }
-
-            return $this->error('Book is not available for borrowing', 'Book not available', Response::HTTP_BAD_REQUEST);
-        } catch (ModelNotFoundException $e) {
-            return $this->error('Resource not found', $e->getMessage(), Response::HTTP_NOT_FOUND);
-        } catch (AuthorizationException $e) {
-            return $this->error('Unauthorized', $e->getMessage(), Response::HTTP_FORBIDDEN);
+            $borrowRecord = $this->bookService->borrowBook($id, $validatedData);
+            return $this->success('Book borrowed successfully', new BorrowRecordResource($borrowRecord));
         } catch (ValidationException $e) {
-            return $this->error('Validation error', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
-        } catch (QueryException $e) {
-            Log::error('Database query error: ' . $e->getMessage());
-            return $this->error('An error occurred while processing your request. Please try again later.', $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->error('Validation failed', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (\Throwable $e) {
             Log::error('Error borrowing book: ' . $e->getMessage());
-            return $this->error('An error occurred while borrowing the book. Please try again later.', $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->error('An error occurred while borrowing the book. Please try again later.', $e->getMessage());
         }
     }
 
@@ -873,40 +825,14 @@ class BookController extends Controller
      * )
      */
 
-    public function return($id)
-    {
-        try {
-            $book = Book::findOrFail($id);
-            $this->authorize('return', $book);
-
-            if ($book->status === 'Borrowed') {
-                $book->update(['status' => 'Available']);
-
-                // Find and update the borrow record
-                $borrowRecord = BorrowRecord::where('book_id', $book->id)
-                    ->whereNull('returned_at') // Ensure it's not already returned
-                    ->where('user_id', auth()->id()) // Ensure the record belongs to the current user
-                    ->firstOrFail();
-
-                $borrowRecord->update(['returned_at' => now()]);
-                $borrowRecord->load('book'); // Load the book relationship
-
-                return $this->success('Book returned successfully', new BorrowRecordResource($borrowRecord));
-            }
-
-            return $this->error('Book is not currently borrowed', 'Book not borrowed', Response::HTTP_BAD_REQUEST);
-        } catch (ModelNotFoundException $e) {
-            return $this->error('Resource not found', $e->getMessage(), Response::HTTP_NOT_FOUND);
-        } catch (AuthorizationException $e) {
-            return $this->error('Unauthorized', $e->getMessage(), Response::HTTP_FORBIDDEN);
-        } catch (ValidationException $e) {
-            return $this->error('Validation error', $e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
-        } catch (QueryException $e) {
-            Log::error('Database query error: ' . $e->getMessage());
-            return $this->error('An error occurred while processing your request. Please try again later.', $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        } catch (\Throwable $e) {
-            Log::error('Error returning book: ' . $e->getMessage());
-            return $this->error('An error occurred while returning the book. Please try again later.', $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
+     public function return($id)
+     {
+         try {
+             $borrowRecord = $this->bookService->returnBook($id);
+             return $this->success('Book returned successfully', new BorrowRecordResource($borrowRecord));
+         } catch (\Throwable $e) {
+             Log::error('Error returning book: ' . $e->getMessage());
+             return $this->error('An error occurred while returning the book. Please try again later.', $e->getMessage());
+         }
+     }
 }
