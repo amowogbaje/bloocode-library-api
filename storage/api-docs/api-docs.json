@@ -19,7 +19,7 @@
                     "Authentication"
                 ],
                 "summary": "User login",
-                "operationId": "bae68d1c55329ecb6e41f48285840c8f",
+                "operationId": "69505cf3a3fb8a85da7f03aaa642bc2a",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -133,7 +133,7 @@
                     "Authors"
                 ],
                 "summary": "Get all authors",
-                "operationId": "ebf96f9667383f3fd5fdb1a35fa042af",
+                "operationId": "470c04fecba1c9a9ac9fb13d8e62acfa",
                 "responses": {
                     "200": {
                         "description": "Authors retrieved successfully",
@@ -226,7 +226,7 @@
                     "Authors"
                 ],
                 "summary": "Create a new author",
-                "operationId": "ff16988993606f7d0225a18972ea43a1",
+                "operationId": "7cad310c19ff437bbfeb97997f92e38f",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -365,7 +365,7 @@
                     "Authors"
                 ],
                 "summary": "Get a specific author",
-                "operationId": "6ff4558235c582c414ae974cf4600ef2",
+                "operationId": "d4f4fccd6ec7aa537bad96a0780f6bc2",
                 "parameters": [
                     {
                         "name": "id",
@@ -485,7 +485,7 @@
                     "Authors"
                 ],
                 "summary": "Update an existing author",
-                "operationId": "1fde280a3436301173b4d55841483d40",
+                "operationId": "6a2153301e52aeaf00816824d260358f",
                 "parameters": [
                     {
                         "name": "id",
@@ -652,7 +652,7 @@
                     "Authors"
                 ],
                 "summary": "Delete an author",
-                "operationId": "0578cdad6faadbf0ceccfc63b43b0e06",
+                "operationId": "dbedbc64751c579f726587dc9c684763",
                 "parameters": [
                     {
                         "name": "id",
@@ -756,7 +756,7 @@
                 ],
                 "summary": "Retrieve a list of books",
                 "description": "Fetches a paginated list of books with optional search, sorting, and pagination.",
-                "operationId": "61b0fdd35b8c14afc6e29eb90598649a",
+                "operationId": "85e2f22169c97cf47c127af60ceda5d1",
                 "parameters": [
                     {
                         "name": "search",
@@ -934,7 +934,7 @@
                     "Books"
                 ],
                 "summary": "Create a new book",
-                "operationId": "5df8eb3d652dcc56b60cd15be3cbbf85",
+                "operationId": "4faf688c2289102cd3ba408a4a419fb2",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1086,7 +1086,7 @@
                     "Books"
                 ],
                 "summary": "Get a book by ID",
-                "operationId": "c5b00bf4246c67b18e3092bd3665ea29",
+                "operationId": "f8cbda71f446fc301a826651f7ab56b1",
                 "parameters": [
                     {
                         "name": "id",
@@ -1190,7 +1190,7 @@
                     "Books"
                 ],
                 "summary": "Update a book by ID",
-                "operationId": "3784164917f8ef14fad58d37b2f7de74",
+                "operationId": "b63afa303156d83e1349446e1d855934",
                 "parameters": [
                     {
                         "name": "id",
@@ -1351,7 +1351,7 @@
                     "Books"
                 ],
                 "summary": "Delete a book by ID",
-                "operationId": "0d28c2ad15a8fdbe85c2c95806b007f6",
+                "operationId": "03bcef50f84e2afb7d422f98aeeba27c",
                 "parameters": [
                     {
                         "name": "id",
@@ -2139,7 +2139,7 @@
                     "Users"
                 ],
                 "summary": "Get all users",
-                "operationId": "12e989554c281d650dff75443acabf54",
+                "operationId": "06a2dece907d695ec25e8e478c92841d",
                 "responses": {
                     "200": {
                         "description": "Users retrieved successfully",
@@ -2222,7 +2222,7 @@
                     "Users"
                 ],
                 "summary": "Create a new user",
-                "operationId": "64da9b5a20fa4f20e947ed61b2bbb6da",
+                "operationId": "4cbe6a6d970b21182ed69a588329be7e",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2337,7 +2337,7 @@
                     "Users"
                 ],
                 "summary": "Get a single user",
-                "operationId": "a9d321d5dc6bc2613c6cf5ba92b76c89",
+                "operationId": "8b535854ba8e35ecadf1a8bf047c3ed4",
                 "parameters": [
                     {
                         "name": "id",
@@ -2451,7 +2451,7 @@
                     "Users"
                 ],
                 "summary": "Update a user",
-                "operationId": "5bcda8371b3cb9f863a47620e636be9b",
+                "operationId": "cbef40bb4b9f3eece4c8e5964430f5e3",
                 "parameters": [
                     {
                         "name": "id",
@@ -2613,7 +2613,7 @@
                     "Users"
                 ],
                 "summary": "Delete a user",
-                "operationId": "0446b3779430bbd9ca0f106d9fd0a2ed",
+                "operationId": "37b25402556f22ee25c10c1225749ae4",
                 "parameters": [
                     {
                         "name": "id",
