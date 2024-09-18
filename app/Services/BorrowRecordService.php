@@ -19,7 +19,7 @@ class BorrowRecordService
     {
         try {
             $borrowRecord = BorrowRecord::findOrFail($id);
-            return $borrowRecord;
+            return $borrowRecord->load('book');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::error('Borrow record not found: ' . $e->getMessage());
             throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Borrow record not found');
@@ -38,7 +38,7 @@ class BorrowRecordService
     public function getAllBorrowRecords()
     {
         try {
-            return BorrowRecord::all();
+            return BorrowRecord::with('book')->get();
         } catch (\Throwable $e) {
             Log::error('Error retrieving borrow records: ' . $e->getMessage());
             throw new \Exception('An error occurred while retrieving borrow records');
