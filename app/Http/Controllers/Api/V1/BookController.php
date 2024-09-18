@@ -94,15 +94,15 @@ class BookController extends Controller
             $this->authorize('update', $book);
 
             $request->validate([
-                'title' => 'required|string',
-                'isbn' => 'required|string|unique:books,isbn,' . $book->id,
+                'title' => 'sometimes|required|string',
+                'isbn' => 'sometimes|required|string|unique:books,isbn,' . $book->id,
                 'published_date' => 'nullable|date',
-                'author_id' => 'required|exists:authors,id',
-                'status' => 'required|in:Available,Borrowed',
+                'author_id' => 'sometimes|required|exists:authors,id',
+                'status' => 'sometimes|required|in:Available,Borrowed',
             ]);
 
             $book->update($request->all());
-            return $this->success('Book updated successfully', new BookResource($book));
+            return $this->success('Book updated successfully', new BookResource($book->refresh()));
         } catch (AuthorizationException $e) {
             return $this->error('Unauthorized', $e->getMessage(), Response::HTTP_FORBIDDEN);
         } catch (ValidationException $e) {
@@ -127,6 +127,21 @@ class BookController extends Controller
         } catch (\Throwable $e) {
             Log::error('Error deleting book: ' . $e->getMessage());
             return $this->error('An error occurred while deleting the book. Please try again later.', $e->getMessage());
+        }
+    }
+
+    public function borrow(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'due_date' => 'nullable|date',
+                'book_id' => 'nullable|date',
+            ]);
+            $borrowRecord = $this->bookService->borrowBook($id, $request);
+            return $this->success('Book borrowed successfully', new BorrowRecordResource($borrowRecord));
+        } catch (\Throwable $e) {
+            Log::error('Error borrowing book: ' . $e->getMessage());
+            return $this->error('An error occurred while borrowing the book. Please try again later.', $e->getMessage());
         }
     }
 

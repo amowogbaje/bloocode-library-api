@@ -14,10 +14,11 @@ class UpdateBookRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required|string|max:255',
-            'isbn' => 'required|string|unique:books,isbn,' . $this->route('book'),
+            'title' => 'sometimes|required|string|max:255',
+            'isbn' => 'sometimes|required|string|unique:books,isbn,' . $this->route('book'),
             'published_date' => 'nullable|date',
-            'author_id' => 'required|exists:authors,id',
+            'author_id' => 'sometimes|required|exists:authors,id',
+            'status' => 'sometimes|required|in:Available,Borrowed',
         ];
     }
 }
