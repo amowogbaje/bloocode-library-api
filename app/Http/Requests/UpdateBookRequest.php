@@ -18,7 +18,6 @@ class UpdateBookRequest extends FormRequest
             'isbn' => 'required|string|unique:books,isbn,' . $this->route('book'),
             'published_date' => 'nullable|date',
             'author_id' => 'required|exists:authors,id',
-            'status' => 'required|in:Available,Borrowed',
         ];
     }
 }
