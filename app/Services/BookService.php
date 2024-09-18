@@ -20,7 +20,7 @@ class BookService
         $sort = $validatedData['sort'] ?? 'desc';
         $query = Book::orderBy('created_at', $sort)
             ->select('id', 'title', 'isbn', 'published_date', 'author_id', 'status')
-            ->with(['author:name,bio,birthdate']);
+            ->with('author');
 
         if (isset($validatedData['search'])) {
             $searchQuery = $validatedData['search'];
