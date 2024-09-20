@@ -922,22 +922,7 @@ use OpenApi\Annotations as OA;
     
     public function POSTapiv1BorrowBook() {}
 
-    public function borrow(Request $request, $id)
-    {
-        try {
-            $validatedData = $request->validate([
-                'due_at' => 'required|integer|min:1',
-            ]);
-
-            $borrowRecord = $this->bookService->borrowBook($id, $validatedData);
-            return $this->success('Book borrowed successfully', new BorrowRecordResource($borrowRecord));
-        } catch (ValidationException $e) {
-            return $this->error('Validation failed', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
-        } catch (\Throwable $e) {
-            Log::error('Error borrowing book: ' . $e->getMessage());
-            return $this->error('An error occurred while borrowing the book. Please try again later.', $e->getMessage());
-        }
-    }
+    
 
 
 

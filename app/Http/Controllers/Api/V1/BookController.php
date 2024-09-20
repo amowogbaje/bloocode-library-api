@@ -133,12 +133,14 @@ class BookController extends Controller
     public function borrow(Request $request, $id)
     {
         try {
-            $request->validate([
-                'due_date' => 'nullable|date',
-                'book_id' => 'nullable|date',
+            $validatedData = $request->validate([
+                'due_at' => 'required|integer|min:1',
             ]);
-            $borrowRecord = $this->bookService->borrowBook($id, $request);
+
+            $borrowRecord = $this->bookService->borrowBook($id, $validatedData);
             return $this->success('Book borrowed successfully', new BorrowRecordResource($borrowRecord));
+        } catch (ValidationException $e) {
+            return $this->error('Validation failed', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (\Throwable $e) {
             Log::error('Error borrowing book: ' . $e->getMessage());
             return $this->error('An error occurred while borrowing the book. Please try again later.', $e->getMessage());
